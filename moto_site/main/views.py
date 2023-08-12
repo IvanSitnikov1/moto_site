@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect
 
 from .models import *
@@ -13,12 +13,37 @@ menu = [
 
 def index(request):
     posts = Motorcycle.objects.all()
+    cats = Category.objects.all()
     context = {
         'title': 'Главная страница',
         'menu': menu,
-        'posts': posts
+        'posts': posts,
+        'cats': cats,
+        'cat_selected': 0,
     }
     return render(request, 'main/index.html', context=context)
+
+
+def show_post(request, post_id):
+    return HttpResponse(f'Отображение статьи с id = {post_id}')
+    return HttpResponse(f'Отображение статьи с id = {post_id}')
+
+
+def show_category(request, cat_id):
+    posts = Motorcycle.objects.filter(cat_id=cat_id)
+    cats = Category.objects.all()
+
+    if len(posts) == 0:
+        raise Http404()
+
+    context = {
+        'title': 'Отображение по рубрикам',
+        'menu': menu,
+        'posts': posts,
+        'cats': cats,
+        'cat_selected': cat_id,
+    }
+    return render(request, 'women/index.html', context=context)
 
 
 def about(request):
