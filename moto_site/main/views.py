@@ -4,15 +4,41 @@ from django.shortcuts import render, redirect
 from .models import *
 
 
-menu = ['О сайте', 'Добавить статью', 'Обратная связь', 'Войти']
+menu = [
+    {'title': 'О сайте', 'url_name': 'about'},
+    {'title': 'Добавить статью', 'url_name': 'add_page'},
+    {'title': 'Обратная связь', 'url_name': 'contact'},
+    {'title': 'Войти', 'url_name': 'login'},
+]
 
 def index(request):
     posts = Motorcycle.objects.all()
-    return render(request, 'main/index.html', {'title': 'Главная страница', 'menu': menu, 'posts': posts})
+    context = {
+        'title': 'Главная страница',
+        'menu': menu,
+        'posts': posts
+    }
+    return render(request, 'main/index.html', context=context)
 
 
 def about(request):
-    return render(request, 'women/about.html', {'title': 'О сайте', 'menu': menu})
+    return render(request, 'main/about.html', {'title': 'О сайте', 'menu': menu})
+
+
+def addpage(request):
+    return HttpResponse('Дбавление статьи')
+
+
+def contact(request):
+    return HttpResponse('Обратная связь')
+
+
+def login(request):
+    return HttpResponse('Авторизация')
+
+
+def show_post(request, post_id):
+    return HttpResponse(f'Отображение статьи с id = {post_id}')
 
 
 def pageNotFound(request, exception):
