@@ -6,7 +6,7 @@ class Motorcycle(models.Model):
     class Meta:
         verbose_name = 'Мотоциклы'
         verbose_name_plural = 'Мотоциклы'
-        ordering = ['-time_create', 'title']
+        ordering = ['id']
 
     title = models.CharField(max_length=255, verbose_name='Заголовок')
     slug = models.SlugField(max_length=255, unique=True, db_index=True, verbose_name='URL')
