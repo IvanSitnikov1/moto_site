@@ -1,5 +1,7 @@
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView
 
 from .models import *
 from .forms import *
@@ -12,59 +14,67 @@ menu = [
     {'title': 'Войти', 'url_name': 'login'},
 ]
 
-def index(request):
-    posts = Motorcycle.objects.all()
-    context = {
-        'title': 'Главная страница',
-        'menu': menu,
-        'posts': posts,
-        'cat_selected': 0,
-    }
-    return render(request, 'main/index.html', context=context)
+class MotorcycleHome(ListView):
+    model = Motorcycle
+    template_name = 'main/index.html'
+    context_object_name = 'posts'
+    allow_empty = False
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Главная страница'
+        context['menu'] = menu
+        context['cat_selected'] = 0
+        return context
+
+    def get_queryset(self):
+        return Motorcycle.objects.filter(is_published=True)
 
 
-def show_post(request, post_slug):
-    post = get_object_or_404(Motorcycle, slug=post_slug)
+class ShowPost(DetailView):
+    model = Motorcycle
+    template_name = 'main/post.html'
+    slug_url_kwarg = 'post_slug'
+    context_object_name = 'post'
 
-    context = {
-        'post': post,
-        'title': post.title,
-        'cat_selected': post.cat_id,
-    }
-
-    return render(request, 'main/post.html', context=context)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = context['post']
+        context['menu'] = menu
+        return context
 
 
-def show_category(request, cat_slug):
-    cat = Category.objects.get(slug=cat_slug)
-    posts = Motorcycle.objects.filter(cat_id=cat.id)
+class MotorcycleCategory(ListView):
+    model = Motorcycle
+    template_name = 'main/index.html'
+    context_object_name = 'posts'
+    allow_empty = False
 
-    if len(posts) == 0:
-        raise Http404()
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Категория - ' + str(context['posts'][0].cat)
+        context['menu'] = menu
+        context['cat_selected'] = context['posts'][0].cat_id
+        return context
 
-    context = {
-        'title': 'Отображение по рубрикам',
-        'menu': menu,
-        'posts': posts,
-        'cat_selected': cat.id,
-    }
-    return render(request, 'main/index.html', context=context)
+    def get_queryset(self):
+        return Motorcycle.objects.filter(cat__slug=self.kwargs['cat_slug'], is_published=True)
 
 
 def about(request):
     return render(request, 'main/about.html', {'title': 'О сайте', 'menu': menu})
 
 
-def addpage(request):
-    if request.method == 'POST':
-        form = AddPostForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    else:
-        form = AddPostForm()
+class AddPage(CreateView):
+    form_class = AddPostForm
+    template_name = 'main/addpage.html'
+    success_url = reverse_lazy('home')
 
-    return render(request, 'main/addpage.html', {'form': form, 'title': 'Добавление статьи'})
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Добавление статьи'
+        context['menu'] = menu
+        return context
 
 
 def contact(request):
@@ -73,10 +83,6 @@ def contact(request):
 
 def login(request):
     return HttpResponse('Авторизация')
-
-
-def show_post(request, post_id):
-    return HttpResponse(f'Отображение статьи с id = {post_id}')
 
 
 def pageNotFound(request, exception):
