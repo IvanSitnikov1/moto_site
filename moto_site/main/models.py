@@ -1,5 +1,6 @@
 from django.db import models
-from django.urls import reverse
+from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy
 
 
 class Motorcycle(models.Model):
@@ -16,6 +17,7 @@ class Motorcycle(models.Model):
     time_update = models.DateTimeField(auto_now=True)
     is_published = models.BooleanField(default=True, verbose_name='Публикация')
     cat = models.ForeignKey('Category', on_delete=models.PROTECT, verbose_name='Категории')
+    author = models.CharField(max_length=255, null=True)
 
     def __str__(self):
         return self.title
