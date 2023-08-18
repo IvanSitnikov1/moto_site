@@ -10,4 +10,8 @@
 {{ post.content|linebreaks }}
 <br>
 <p>Автор статьи: {{ post.author }}</p>
+{% if post.author == request.user.username or request.user.username == 'admin' %}
+    <p class="link-read-post"><a href="{% url 'update' post.slug %}">Редактировать пост</a></p>
+    <p class="link-read-post"><a href="{% url 'delete' post.slug %}">Удалить пост</a></p>
+{% endif %}
 {% endblock %}

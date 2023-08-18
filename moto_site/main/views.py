@@ -5,13 +5,14 @@ from django.db.models import Count
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
 from .models import *
 from .forms import *
 from .utils import DataMixin
 
 
+# Вывод всех постов и постов по категориям
 class MotorcycleHome(DataMixin, ListView):
     model = Motorcycle
     template_name = 'main/index.html'
@@ -24,18 +25,6 @@ class MotorcycleHome(DataMixin, ListView):
 
     def get_queryset(self):
         return Motorcycle.objects.filter(is_published=True)
-
-
-class ShowPost(DataMixin, DetailView):
-    model = Motorcycle
-    template_name = 'main/post.html'
-    slug_url_kwarg = 'post_slug'
-    context_object_name = 'post'
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title=context['post'])
-        return {**context, **c_def}
 
 
 class MotorcycleCategory(DataMixin, ListView):
@@ -54,10 +43,7 @@ class MotorcycleCategory(DataMixin, ListView):
         return Motorcycle.objects.filter(cat__slug=self.kwargs['cat_slug'], is_published=True)
 
 
-def about(request):
-    return render(request, 'main/about.html')
-
-
+# GRUD операции с постами
 class AddPage(LoginRequiredMixin, DataMixin, CreateView):
     form_class = AddPostForm
     template_name = 'main/addpage.html'
@@ -70,18 +56,44 @@ class AddPage(LoginRequiredMixin, DataMixin, CreateView):
         return {**context, **c_def}
 
     def form_valid(self, form):
-        instance = form.save(commit=False)
+        post = form.save(commit=False)
         author = self.request.user.username
-        instance.author = author
-        instance.save()
-        print(instance.author)
-        return redirect(reverse_lazy('home'))
+        post.author = author
+        post.save()
+        return redirect(f'/post/{post.slug}')
 
 
-def contact(request):
-    return HttpResponse('Обратная связь')
+class ShowPost(DataMixin, DetailView):
+    model = Motorcycle
+    template_name = 'main/post.html'
+    slug_url_kwarg = 'post_slug'
+    context_object_name = 'post'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title=context['post'])
+        return {**context, **c_def}
 
 
+class UpdatePost(DataMixin, UpdateView):
+    model = Motorcycle
+    form_class = AddPostForm
+    template_name = 'main/update_post.html'
+    slug_url_kwarg = 'post_slug'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Редактирование поста')
+        return {**context, **c_def}
+
+
+def delete(request, post_slug):
+    post = Motorcycle.objects.get(slug=post_slug)
+    post.delete()
+    return redirect(f'/category/{post.cat.slug}')
+
+
+# Регистрация и авторизация пользователей
 class RegisterUser(DataMixin, CreateView):
     form_class = RegisterUserForm
     template_name = 'main/register.html'
@@ -111,6 +123,14 @@ class LoginUser(DataMixin, LoginView):
 def logout_user(request):
     logout(request)
     return redirect('login')
+
+
+def about(request):
+    return render(request, 'main/about.html')
+
+
+def contact(request):
+    return HttpResponse('Обратная связь')
 
 
 def pageNotFound(request, exception):
