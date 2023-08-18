@@ -9,7 +9,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
 from .models import *
 from .forms import *
-from .utils import DataMixin
+from .utils import DataMixin, menu
 
 
 # Вывод всех постов и постов по категориям
@@ -126,11 +126,19 @@ def logout_user(request):
 
 
 def about(request):
-    return render(request, 'main/about.html')
+    cats = Category.objects.annotate(Count('motorcycle'))
+    user_menu = menu.copy()
+    if not request.user.is_authenticated:
+        user_menu.pop(1)
+    return render(request, 'main/about.html', {'menu': user_menu, 'cats': cats})
 
 
 def contact(request):
-    return HttpResponse('Обратная связь')
+    cats = Category.objects.annotate(Count('motorcycle'))
+    user_menu = menu.copy()
+    if not request.user.is_authenticated:
+        user_menu.pop(1)
+    return render(request, 'main/contact.html', {'menu': user_menu, 'cats': cats})
 
 
 def pageNotFound(request, exception):
