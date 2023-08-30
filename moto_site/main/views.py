@@ -35,12 +35,17 @@ class MotorcycleCategory(DataMixin, ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Категория - ' + str(context['posts'][0].cat),
-                                      cat_selected=context['posts'][0].cat_id)
+        c_def = self.get_user_context(
+            title='Категория - ' + str(context['posts'][0].cat),
+            cat_selected=context['posts'][0].cat_id
+        )
         return {**context, **c_def}
 
     def get_queryset(self):
-        return Motorcycle.objects.filter(cat__slug=self.kwargs['cat_slug'], is_published=True)
+        return Motorcycle.objects.filter(
+            cat__slug=self.kwargs['cat_slug'],
+            is_published=True
+        )
 
 
 # GRUD операции с постами
@@ -50,6 +55,7 @@ class AddPage(LoginRequiredMixin, DataMixin, CreateView):
     success_url = reverse_lazy('home')
     login_url = reverse_lazy('home')
     raise_exception = True
+
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Добавление статьи')
@@ -130,7 +136,11 @@ def about(request):
     user_menu = menu.copy()
     if not request.user.is_authenticated:
         user_menu.pop(1)
-    return render(request, 'main/about.html', {'menu': user_menu, 'cats': cats})
+    return render(
+        request,
+        'main/about.html',
+        {'menu': user_menu, 'cats': cats}
+    )
 
 
 def contact(request):
@@ -138,7 +148,11 @@ def contact(request):
     user_menu = menu.copy()
     if not request.user.is_authenticated:
         user_menu.pop(1)
-    return render(request, 'main/contact.html', {'menu': user_menu, 'cats': cats})
+    return render(
+        request,
+        'main/contact.html',
+        {'menu': user_menu, 'cats': cats}
+    )
 
 
 def pageNotFound(request, exception):
