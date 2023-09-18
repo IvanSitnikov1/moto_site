@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 
 from .views import *
 
@@ -18,4 +18,5 @@ urlpatterns = [
         MotorcycleCategory.as_view(),
         name='category'
     ),
+    path('social/', include('social_django.urls', namespace='social_django')),
 ]

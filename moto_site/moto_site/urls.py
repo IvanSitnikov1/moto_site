@@ -24,6 +24,8 @@ from main.views import pageNotFound
 urlpatterns = [
     path('', include('main.urls')),
     path('admin/', admin.site.urls),
+    path('oauth/', include('main.urls')),
+    path('social-auth/', include('social_django.urls', namespace='social')),
 ]
 
 if settings.DEBUG:
