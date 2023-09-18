@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'social_django',
     'main.apps.MainConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -60,6 +61,8 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -68,6 +71,18 @@ TEMPLATES = [
         },
     },
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'social_core.backends.vk.VKOAuth2',
+    'social_core.backends.yandex.YandexOAuth2',
+    'django.contrib.auth.backends.ModelBackend'
+]
+
+SOCIAL_AUTH_VK_OAUTH2_KEY = '51708540'
+SOCIAL_AUTH_VK_OAUTH2_SECRET = 'hqwim6Zwz7fKqkFKSTSo'
+SOCIAL_AUTH_VK_OAUTH2_SCORE = ['offline', 'email', 'friends']
+SOCIAL_AUTH_YANDEX_OAUTH2_KEY = '5ecbc98db445480ab6c4637db133dd81'
+SOCIAL_AUTH_YANDEX_OAUTH2_SECRET = 'a7d24cb72c3d41398c97ccd393213720'
 
 WSGI_APPLICATION = 'moto_site.wsgi.application'
 
